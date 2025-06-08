@@ -1,0 +1,67 @@
+# it's saml since kimai doesn't support oauth2 native (https://github.com/kimai/kimai/issues/1317) or proxy (https://github.com/kimai/kimai/discussions/3122)
+kimai:
+    saml:
+        provider: google
+        activate: true
+        title: Login with Google
+        mapping:
+            - { saml: $Email, kimai: email }
+            - { saml: $FirstName $LastName, kimai: alias }
+            - { saml: Domain User, kimai: title }
+            - { saml: $Email, kimai: accountNumber }
+        roles:
+            resetOnLogin: true
+            attribute: Groups
+            mapping:
+                - { saml: Rundeck Admin, kimai: ROLE_SUPER_ADMIN }
+                - { saml: Kimai Admin, kimai: ROLE_ADMIN }
+                - { saml: Kimai Team Lead, kimai: ROLE_TEAMLEAD }
+        connection:
+            idp:
+                entityId: 'https://accounts.google.com/o/saml2?idpid=IDPID'
+                singleSignOnService:
+                    url: 'https://accounts.google.com/o/saml2/idp?idpid=IDPID'
+                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+                #singleLogoutService:
+                #    url: 'https://www.example.com/logout'
+                #    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+                x509cert: 'X509CERT'
+            # Your Kimai: replace https://www.example.com with your base URL
+            sp:
+                entityId: 'https://kimai.domain/auth/saml/metadata'
+                assertionConsumerService:
+                    url: 'https://kimai.domain/auth/saml/acs'
+                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
+                singleLogoutService:
+                    url: 'https://kimai.domain/auth/saml/logout'
+                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+                #privateKey: ''
+            # only set baseurl, if auto-detection doesn't work
+            baseurl: 'https://kimai.domain/auth/saml/'
+            strict: true
+            debug: true
+            security:
+                nameIdEncrypted: false
+                authnRequestsSigned: false
+                logoutRequestSigned: false
+                logoutResponseSigned: false
+                wantMessagesSigned: false
+                wantAssertionsSigned: false
+                wantNameIdEncrypted: false
+                requestedAuthnContext: true
+                signMetadata: false
+                wantXMLValidation: true
+                signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+                digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256'
+            contactPerson:
+                technical:
+                    givenName: 'Kimai Admin'
+                    emailAddress: 'admin@example.com'
+                support:
+                    givenName: 'Kimai Support'
+                    emailAddress: 'support@example.com'
+            organization:
+                en:
+                    name: 'Kimai'
+                    displayname: 'Kimai'
+                    url: 'https://kimai.domain'
